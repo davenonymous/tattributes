@@ -24,3 +24,8 @@ native att_getClientAvailablePoints(iClient);
 native attChooseResult:att_chooseStrength(iClient);
 native attChooseResult:att_chooseStamina(iClient);
 native attChooseResult:att_chooseDexterity(iClient);
+
+
+forward att_OnClientStrengthChange(iClient, iValue, iAmount);
+forward att_OnClientStaminaChange(iClient, iValue, iAmount);
+forward att_OnClientDexterityChange(iClient, iValue, iAmount);

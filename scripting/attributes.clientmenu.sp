@@ -85,21 +85,20 @@ public ChooserMenu_Handler(Handle:menu, MenuAction:action, param1, param2) {
 		new bool:found = GetMenuItem(menu, param2, info, sizeof(info));
 		PrintToConsole(param1, "You selected item: %d (found? %d info: %s)", param2, found, info);
 
-		new attChooseResult:result;
 		switch(param2) {
 			case 0: {
 				//Strength
-				result = att_chooseStrength(param1);
+				att_chooseStrength(param1);
 			}
 
 			case 1: {
 				//Dexterity
-				result = att_chooseDexterity(param1);
+				att_chooseDexterity(param1);
 			}
 
 			case 2: {
 				//Stamina
-				result = att_chooseStamina(param1);
+				att_chooseStamina(param1);
 			}
 		}
 

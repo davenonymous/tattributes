@@ -8,6 +8,10 @@
 #define PLUGIN_VERSION 		"0.1.0"
 #define MAXSKILLLEVEL 		10
 
+new Handle:g_hForwardStrengthUp;
+new Handle:g_hForwardStaminaUp;
+new Handle:g_hForwardDexterityUp;
+
 new g_iPlayerStrength[MAXPLAYERS+1];
 new g_iPlayerDexterity[MAXPLAYERS+1];
 new g_iPlayerStamina[MAXPLAYERS+1];
@@ -40,6 +44,10 @@ public OnPluginStart()
 	g_hCvarEnable = CreateConVar("sm_att_enabled", "1", "Enables the plugin", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 
 	HookConVarChange(g_hCvarEnable, Cvar_Changed);
+
+	g_hForwardStrengthUp = CreateGlobalForward("att_OnClientStrengthChange", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
+	g_hForwardStaminaUp = CreateGlobalForward("att_OnClientStaminaChange", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
+	g_hForwardDexterityUp = CreateGlobalForward("att_OnClientDexterityChange", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 }
 
 public OnConfigsExecuted()
@@ -55,7 +63,7 @@ public Cvar_Changed(Handle:convar, const String:oldValue[], const String:newValu
 //////////////////////////////////
 //C L I E N T  C O N N E C T E D//
 //////////////////////////////////
-public OnClientPutInServer(iClient)
+public OnClientConnected(iClient)
 {
 	if(g_bEnabled)
 	{
@@ -117,6 +125,7 @@ stock attChooseResult:ChooseStrength(iClient) {
 
 	g_iPlayerAvailablePoints[iClient]--;
 	g_iPlayerStrength[iClient]++;
+	Forward_StrengthChange(iClient, g_iPlayerStrength[iClient], 1);
 
 	return att_OK;
 }
@@ -130,6 +139,7 @@ stock attChooseResult:ChooseStamina(iClient) {
 
 	g_iPlayerAvailablePoints[iClient]--;
 	g_iPlayerStamina[iClient]++;
+	Forward_StaminaChange(iClient, g_iPlayerStamina[iClient], 1);
 
 	return att_OK;
 }
@@ -143,6 +153,7 @@ stock attChooseResult:ChooseDexterity(iClient) {
 
 	g_iPlayerAvailablePoints[iClient]--;
 	g_iPlayerDexterity[iClient]++;
+	Forward_DexterityChange(iClient, g_iPlayerDexterity[iClient], 1);
 
 	return att_OK;
 }
@@ -285,4 +296,34 @@ public Native_GetClientAvailablePoints(Handle:hPlugin, iNumParams)
 	new iClient = GetNativeCell(1);
 
 	return g_iPlayerAvailablePoints[iClient];
+}
+
+//public att_OnClientStrengthChange(iClient, iValue, iAmount) {};
+public Forward_StrengthChange(iClient, iValue, iAmount)
+{
+	Call_StartForward(g_hForwardStrengthUp);
+	Call_PushCell(iClient);
+	Call_PushCell(iValue);
+	Call_PushCell(iAmount);
+	Call_Finish();
+}
+
+//public att_OnClientStaminaChange(iClient, iValue, iAmount) {};
+public Forward_StaminaChange(iClient, iValue, iAmount)
+{
+	Call_StartForward(g_hForwardStaminaUp);
+	Call_PushCell(iClient);
+	Call_PushCell(iValue);
+	Call_PushCell(iAmount);
+	Call_Finish();
+}
+
+//public att_OnClientDexterityChange(iClient, iValue, iAmount) {};
+public Forward_DexterityChange(iClient, iValue, iAmount)
+{
+	Call_StartForward(g_hForwardDexterityUp);
+	Call_PushCell(iClient);
+	Call_PushCell(iValue);
+	Call_PushCell(iAmount);
+	Call_Finish();
 }
