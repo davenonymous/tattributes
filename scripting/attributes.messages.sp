@@ -59,3 +59,37 @@ public Event_Player_Death(Handle:event, const String:name[], bool:dontBroadcast)
 		}
 	}
 }
+
+
+public att_OnClientStrengthChange(iClient, iValue, iAmount) {
+	if(att_IsEnabled())
+	{
+		new skillpoints = att_getClientStrength(iClient);
+		if(skillpoints > 0)
+		{
+			CPrintToChat(iClient, "You are now dealing {green}%i\%{default} more damage.", skillpoints * 2);
+		}
+	}
+}
+
+public att_OnClientStaminaChange(iClient, iValue, iAmount) {
+	if(att_IsEnabled())
+	{
+		new skillpoints = att_getClientStamina(iClient);
+		if(skillpoints > 0)
+		{
+			CPrintToChat(iClient, "You are now having {green}%i\%{default} more health.", skillpoints * 3);
+		}
+	}
+}
+
+public att_OnClientDexterityChange(iClient, iValue, iAmount) {
+	if(att_IsEnabled())
+	{
+		new skillpoints = att_getClientDexterity(iClient);
+		if(skillpoints > 0)
+		{
+			CPrintToChat(iClient, "You are now running {green}%i\%{default} faster.", skillpoints * 2);
+		}
+	}
+}

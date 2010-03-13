@@ -97,7 +97,8 @@ stock applyEffects(client) {
 	new iHealth = GetEntProp(client, Prop_Data, "m_iMaxHealth");
 
 	iHealth += att_getClientStamina(client) * 3;
-	SetEntProp(client, Prop_Send, "m_iHealth", iHealth);
+	SetEntityHealth(client, iHealth);
+	//SetEntProp(client, Prop_Send, "m_iHealth", iHealth);
 }
 
 stock increaseEffectDexterity(client, amount) {
