@@ -3,6 +3,7 @@
 #include <attributes>
 #include <colors>
 #include <tf2_stocks>
+#include <tf2_advanced>
 #include <sdkhooks>
 
 #pragma semicolon 1
@@ -94,7 +95,8 @@ stock applyEffects(client) {
 	applyClassSpeed(client);
 
 	//Set Health according to Stamina
-	new iHealth = GetEntProp(client, Prop_Data, "m_iMaxHealth");
+	//new iHealth = GetEntProp(client, Prop_Data, "m_iMaxHealth");
+	new iHealth = TF2_GetPlayerDefaultHealth(client);
 
 	iHealth += att_getClientStamina(client) * 3;
 	SetEntityHealth(client, iHealth);
@@ -117,31 +119,7 @@ public att_OnClientDexterityChange(iClient, iValue, iAmount) {
 	applyEffects(iClient);
 }
 
-stock applyClassSpeed(client) {
-	SetClassSpeed(client, TF2_GetPlayerClass(client), (1.0 + att_getClientDexterity(client) * 0.02));
-}
 
-SetClassSpeed(client, TFClassType:class, Float:multiplier)
-{
-    switch (class)
-    {
-        case TFClass_Scout:
-            SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", 400.0 * multiplier);
-        case TFClass_Sniper:
-            SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", 300.0 * multiplier);
-        case TFClass_Soldier:
-            SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", 240.0 * multiplier);
-        case TFClass_DemoMan:
-            SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", 280.0 * multiplier);
-        case TFClass_Medic:
-            SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", 320.0 * multiplier);
-        case TFClass_Heavy:
-            SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", 230.0 * multiplier);
-        case TFClass_Pyro:
-            SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", 300.0 * multiplier);
-        case TFClass_Spy:
-            SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", 300.0 * multiplier);
-        case TFClass_Engineer:
-            SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", 300.0 * multiplier);
-    }
+stock applyClassSpeed(client) {
+	SetEntPropFloat(client, Prop_Send, "m_flMaxspeed", TF2_GetPlayerClassSpeed(client) * (1.0 + att_getClientDexterity(client) * 0.02));
 }
