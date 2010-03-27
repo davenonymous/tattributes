@@ -26,6 +26,14 @@ public Plugin:myinfo =
 //////////////////////////
 public OnPluginStart()
 {
+	// G A M E  C H E C K //
+	decl String:game[32];
+	GetGameFolderName(game, sizeof(game));
+	if(!(StrEqual(game, "left4dead2") || StrEqual(game, "left4dead")))
+	{
+		SetFailState("This plugin is not for %s.", game);
+	}
+
 	g_iStrengthID = att_RegisterAttribute("Strength", "Increases damage you deal", att_OnStrengthChange);
 }
 
@@ -39,6 +47,14 @@ public OnClientPutInServer(client)
     SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 }
 
+public OnEntityCreated(entity, const String:classname[])
+{
+	if (StrEqual(classname, "infected", false))
+	{
+		SDKHook(entity, SDKHook_OnTakeDamage, OnTakeDamage);
+	}
+}
+
 public att_OnStrengthChange(iClient, iValue, iAmount) {
 	g_Strength[iClient] = iValue;
 
@@ -50,13 +66,14 @@ public att_OnStrengthChange(iClient, iValue, iAmount) {
 
 public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
-	new skillpoints = g_Strength[attacker];
-	if(skillpoints > 0)
-	{
-		damage *= (1.0 + skillpoints * 0.02);
+	if(attacker > 0 && attacker <= MaxClients) {
+		new skillpoints = g_Strength[attacker];
+		if(skillpoints > 0)
+		{
+			damage *= (1.0 + skillpoints * 0.02);
 
-		return Plugin_Changed;
+			return Plugin_Changed;
+		}
 	}
-
 	return Plugin_Continue;
 }
