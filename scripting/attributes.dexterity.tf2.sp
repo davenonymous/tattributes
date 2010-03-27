@@ -37,6 +37,9 @@ public OnPluginStart()
 	}
 
 	g_iDexterityID = att_RegisterAttribute("Dexterity", "Increases running speed", att_OnDexterityChange);
+
+	HookEvent("player_spawn", Event_Player_Spawn);
+	HookEvent("post_inventory_application", EventInventoryApplication,  EventHookMode_Post);
 }
 
 public OnClientPutInServer(client)
