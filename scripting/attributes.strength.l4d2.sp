@@ -14,7 +14,7 @@ new g_iStrengthID;
 ////////////////////////
 public Plugin:myinfo =
 {
-	name = "tAttributes Mod, Strength",
+	name = "tAttributes Mod, Strength (works on L4D(2) Infected)",
 	author = "Thrawn",
 	description = "A plugin for tAttributes Mod, Strength, increases damage done (uses SDKHooks).",
 	version = PLUGIN_VERSION,
