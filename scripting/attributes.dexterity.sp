@@ -78,10 +78,12 @@ public OnPluginEnd()
 
 public att_OnDexterityChange(iClient, iValue, iAmount) {
 	g_Dexterity[iClient] = iValue;
-	applyClassSpeed(iClient);
-	if(iAmount != -1)
-	{
-		CPrintToChat(iClient, "You are now running {green}%i{default} faster.", g_Dexterity[iClient] * g_fSpeedMultiplier * 100);
+	if(IsClientInGame(iClient)) {
+		applyClassSpeed(iClient);
+		if(iAmount != -1)
+		{
+			CPrintToChat(iClient, "You are now running {green}%i{default} faster.", g_Dexterity[iClient] * g_fSpeedMultiplier * 100);
+		}
 	}
 }
 

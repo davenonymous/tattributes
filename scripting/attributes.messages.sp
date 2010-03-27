@@ -61,7 +61,7 @@ public Event_Player_Death(Handle:event, const String:name[], bool:dontBroadcast)
 }
 
 public att_OnClientAttributeChange(iClient, iAttributeId, iValue, iAmount) {
-	if(att_IsEnabled())
+	if(att_IsEnabled() && IsClientInGame(iClient))
 	{
 		if(iAmount == -1)
 			CPrintToChat(iClient, "Your attribute points have been loaded.");

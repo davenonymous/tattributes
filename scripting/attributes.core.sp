@@ -6,8 +6,6 @@
 #pragma semicolon 1
 
 #define PLUGIN_VERSION 		"0.1.0"
-#define MAXSKILLLEVEL 		10
-#define ATTRIBUTESIZE		10
 
 new Handle:g_hForwardAttributeChange;
 

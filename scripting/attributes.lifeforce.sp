@@ -74,10 +74,12 @@ public OnPluginEnd()
 
 public att_OnLifeforceChange(iClient, iValue, iAmount) {
 	g_Lifeforce[iClient] = iValue;
-	applyClassHealth(iClient);
-	if(iAmount != -1)
-	{
-		CPrintToChat(iClient, "You start with {green}%i{default} additional healthpoints.", g_Lifeforce[iClient] * g_iHealthPlus);
+	if(IsClientInGame(iClient)) {
+		applyClassHealth(iClient);
+		if(iAmount != -1)
+		{
+			CPrintToChat(iClient, "You start with {green}%i{default} additional healthpoints.", g_Lifeforce[iClient] * g_iHealthPlus);
+		}
 	}
 }
 
