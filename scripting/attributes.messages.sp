@@ -67,36 +67,3 @@ public att_OnClientAttributeChange(iClient, iAttributeId, iValue, iAmount) {
 			CPrintToChat(iClient, "Your attribute points have been loaded.");
 	}
 }
-/*
-public att_OnClientStrengthChange(iClient, iValue, iAmount) {
-	if(att_IsEnabled())
-	{
-		new skillpoints = att_GetClientStrength(iClient);
-		if(skillpoints > 0)
-		{
-			CPrintToChat(iClient, "You are now dealing {green}%i\%{default} more damage.", skillpoints * 2);
-		}
-	}
-}
-
-public att_OnClientStaminaChange(iClient, iValue, iAmount) {
-	if(att_IsEnabled())
-	{
-		new skillpoints = att_GetClientStamina(iClient);
-		if(skillpoints > 0)
-		{
-			CPrintToChat(iClient, "You are now having {green}%i\%{default} more health.", skillpoints * 3);
-		}
-	}
-}
-
-public att_OnClientDexterityChange(iClient, iValue, iAmount) {
-	if(att_IsEnabled())
-	{
-		new skillpoints = att_GetClientDexterity(iClient);
-		if(skillpoints > 0)
-		{
-			CPrintToChat(iClient, "You are now running {green}%i\%{default} faster.", skillpoints * 2);
-		}
-	}
-}*/

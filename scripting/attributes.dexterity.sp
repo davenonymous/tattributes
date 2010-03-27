@@ -30,7 +30,7 @@ public OnPluginStart()
 	// G A M E  C H E C K //
 	decl String:game[32];
 	GetGameFolderName(game, sizeof(game));
-	if(!(StrEqual(game, "left4dead2")))
+	if((StrEqual(game, "tf")))
 	{
 		SetFailState("This plugin is not for %s", game);
 	}
