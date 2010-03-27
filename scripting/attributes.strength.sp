@@ -6,6 +6,9 @@
 #pragma semicolon 1
 #define PLUGIN_VERSION "0.1.0"
 
+new Handle:g_hCvarDmgMultiplier;
+new Float:g_fDmgMultiplier;
+
 new g_Strength[MAXPLAYERS+1];
 new g_iStrengthID;
 
@@ -34,7 +37,19 @@ public OnPluginStart()
 		SetFailState("This plugin is not for %s. Use attributes.strength.l4d2 instead.", game);
 	}
 
+	g_hCvarDmgMultiplier = CreateConVar("sm_att_strength_dmgmultiplier", "0.02", "Damage done grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
+	HookConVarChange(g_hCvarDmgMultiplier, Cvar_Changed);
+
 	g_iStrengthID = att_RegisterAttribute("Strength", "Increases damage you deal", att_OnStrengthChange);
+}
+
+public OnConfigsExecuted()
+{
+	g_fDmgMultiplier = GetConVarFloat(g_hCvarDmgMultiplier);
+}
+
+public Cvar_Changed(Handle:convar, const String:oldValue[], const String:newValue[]) {
+	OnConfigsExecuted();
 }
 
 public OnPluginEnd()
@@ -52,7 +67,7 @@ public att_OnStrengthChange(iClient, iValue, iAmount) {
 
 	if(iAmount != -1)
 	{
-		CPrintToChat(iClient, "You are now dealing {green}%i\%{default} more damage.", g_Strength[iClient] * 2);
+		CPrintToChat(iClient, "You are now dealing {green}%i\%{default} more damage.", g_Strength[iClient] * g_fDmgMultiplier * 100);
 	}
 }
 
@@ -61,7 +76,7 @@ public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 	new skillpoints = g_Strength[attacker];
 	if(skillpoints > 0)
 	{
-		damage *= (1.0 + skillpoints * 0.02);
+		damage *= (1.0 + skillpoints * g_fDmgMultiplier);
 
 		return Plugin_Changed;
 	}

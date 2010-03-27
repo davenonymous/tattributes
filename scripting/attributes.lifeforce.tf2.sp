@@ -7,6 +7,9 @@
 #pragma semicolon 1
 #define PLUGIN_VERSION "0.1.0"
 
+new Handle:g_hCvarHealthPlus;
+new g_iHealthPlus;
+
 new g_Lifeforce[MAXPLAYERS+1];
 new g_iLifeforceID;
 
@@ -36,7 +39,22 @@ public OnPluginStart()
 		SetFailState("This plugin is not for %s", game);
 	}
 
+	g_hCvarHealthPlus = CreateConVar("sm_att_lifeforce_healthplus", "3", "Health grows by this value every attribute point", FCVAR_PLUGIN, true, 0.0);
+	HookConVarChange(g_hCvarHealthPlus, Cvar_Changed);
+
 	g_iLifeforceID = att_RegisterAttribute("Lifeforce", "Increases health", att_OnLifeforceChange);
+
+	HookEvent("player_spawn", Event_Player_Spawn);
+	HookEvent("post_inventory_application", EventInventoryApplication,  EventHookMode_Post);
+}
+
+public OnConfigsExecuted()
+{
+	g_iHealthPlus = GetConVarInt(g_hCvarHealthPlus);
+}
+
+public Cvar_Changed(Handle:convar, const String:oldValue[], const String:newValue[]) {
+	OnConfigsExecuted();
 }
 
 //////////////////////////
@@ -75,13 +93,13 @@ public att_OnLifeforceChange(iClient, iValue, iAmount) {
 	applyClassHealth(iClient);
 	if(iAmount != -1)
 	{
-		CPrintToChat(iClient, "You start with {green}%i{default} additional healthpoints.", g_Lifeforce[iClient] * 3);
+		CPrintToChat(iClient, "You start with {green}%i{default} additional healthpoints.", g_Lifeforce[iClient] * g_iHealthPlus);
 	}
 }
 
 stock applyClassHealth(client) {
 	new iHealth = TF2_GetPlayerDefaultHealth(client);
 
-	iHealth += g_Lifeforce[client] * 3;
+	iHealth += g_Lifeforce[client] * g_iHealthPlus;
 	SetEntityHealth(client, iHealth);
 }

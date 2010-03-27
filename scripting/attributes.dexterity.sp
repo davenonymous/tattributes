@@ -42,9 +42,9 @@ public OnPluginStart()
 	g_hCvarSpeedMultiplier = CreateConVar("sm_att_dexterity_speedmultiplier", "0.02", "Speed grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarSpeedMultiplier, Cvar_Changed);
 
-	HookEvent("player_spawn", Event_Player_Spawn);
-
 	g_iDexterityID = att_RegisterAttribute("Dexterity", "Increases running speed", att_OnDexterityChange);
+
+	HookEvent("player_spawn", Event_Player_Spawn);
 }
 
 public OnConfigsExecuted()
