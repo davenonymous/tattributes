@@ -2,7 +2,6 @@
 #include <attributes>
 #include <sdkhooks>
 #include <colors>
-#include <tf2_advanced>
 
 #pragma semicolon 1
 #define PLUGIN_VERSION "0.1.0"
