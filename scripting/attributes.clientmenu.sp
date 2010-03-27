@@ -14,9 +14,9 @@ new Handle:g_hCvarDeathMessage;
 ////////////////////////
 public Plugin:myinfo =
 {
-	name = "tAttributes Mod, ChatMessages",
+	name = "tAttributes Mod, ClientMenu",
 	author = "Thrawn",
-	description = "A plugin for tAttributes Mod, displaying various informations via chat.",
+	description = "A plugin for tAttributes Mod, providing clients with a menu.",
 	version = PLUGIN_VERSION,
 	url = "http://thrawn.de"
 }
@@ -51,22 +51,23 @@ public CreateChooserMenu(client) {
 	new Handle:menu = CreateMenu(ChooserMenu_Handler);
 
 	decl String:sMenuTitle[128];
-	Format(sMenuTitle, sizeof(sMenuTitle), "You have %i points available. Choose wisely!", att_getClientAvailablePoints(client));
+	Format(sMenuTitle, sizeof(sMenuTitle), "You have %i points available. Choose wisely!", att_GetClientAvailablePoints(client));
 
 	SetMenuTitle(menu, sMenuTitle);
 
-	decl String:sStrength[32];
-	Format(sStrength, sizeof(sStrength), "Strength: %i", att_getClientStrength(client));
+	new count = att_GetAttributeCount();
+	for(new i = 0; i < count; i++) {
+		new eID = att_GetAttributeID(i);
 
-	decl String:sStamina[32];
-	Format(sStamina, sizeof(sStamina), "Stamina: %i", att_getClientStamina(client));
+		new String:eName[64];
+		att_GetAttributeName(eID,eName);
+		Format(eName, sizeof(eName), "%s: %i", eName, att_GetClientAttributeValue(client, eID));
 
-	decl String:sDexterity[32];
-	Format(sDexterity, sizeof(sDexterity), "Dexterity: %i", att_getClientDexterity(client));
+		new String:eIDString[4];
+		IntToString(eID, eIDString, 4);
 
-	AddMenuItem(menu, "str", sStrength);
-	AddMenuItem(menu, "dex", sDexterity);
-	AddMenuItem(menu, "sta", sStamina);
+		AddMenuItem(menu, eIDString, eName);
+	}
 
 	//AddMenuItem(menu, "no", "Cancel");
 	SetMenuExitButton(menu, true);
@@ -79,28 +80,14 @@ public ChooserMenu_Handler(Handle:menu, MenuAction:action, param1, param2) {
 	//param2:: item
 
 	if(action == MenuAction_Select) {
-		new String:info[32];
+		new String:sEID[32];
 
 		/* Get item info */
-		new bool:found = GetMenuItem(menu, param2, info, sizeof(info));
-		PrintToConsole(param1, "You selected item: %d (found? %d info: %s)", param2, found, info);
+		GetMenuItem(menu, param2, sEID, sizeof(sEID));
+		//PrintToConsole(param1, "You selected item: %d (found? %d info: %s)", param2, found, info);
+		new eID = StringToInt(sEID);
 
-		switch(param2) {
-			case 0: {
-				//Strength
-				att_chooseStrength(param1);
-			}
-
-			case 1: {
-				//Dexterity
-				att_chooseDexterity(param1);
-			}
-
-			case 2: {
-				//Stamina
-				att_chooseStamina(param1);
-			}
-		}
+		att_AddClientAttributeValue(param1, eID, 1);
 
 		CreateChooserMenu(param1);
 	} else if (action == MenuAction_Cancel) {

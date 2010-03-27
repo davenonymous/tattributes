@@ -24,7 +24,7 @@ public Plugin:myinfo =
 
 public OnPluginStart()
 {
-	g_hCvarReapplyPoints = CreateConVar("sm_att_lm_reapplypoints", "0", "Reapply points based on levelmod level. ONLY USE if you are not saving attribute points via a seperate plugin.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_hCvarReapplyPoints = CreateConVar("sm_att_lm_reapplypoints", "1", "Reapply points based on levelmod level. ONLY USE if you are not saving attribute points via a seperate plugin.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	HookConVarChange(g_hCvarReapplyPoints, Cvar_Changed);
 
 	HookEvent("player_spawn", Event_Player_Spawn);
@@ -47,13 +47,14 @@ public Event_Player_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
 	if(g_bReapplyPoints) {
 		new client = GetClientOfUserId(GetEventInt(event, "userid"));
 		if(!g_bPointsReapplied[client]) {
-			att_addClientAvailablePoints(client, lm_GetClientLevel(client));
+			att_AddClientAvailablePoints(client, lm_GetClientLevel(client));
 			g_bPointsReapplied[client] = true;
 		}
 	}
 }
 
-public lm_OnClientLevelUp(client, level, amount)
+public lm_OnClientLevelUp(client, level, amount, bool:isLevelDown)
 {
-	att_addClientAvailablePoints(client, amount);
+	if(!isLevelDown)
+		att_AddClientAvailablePoints(client, amount);
 }

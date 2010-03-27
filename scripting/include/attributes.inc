@@ -3,29 +3,75 @@
 #endif
 #define _attributes_included_
 
+#define TATTAPIVERSION 1
+
 enum attChooseResult {
 	att_OK,
 	att_NoAvailablePoints,
-	att_MaxSkillLevelReached
+	att_MaxSkillLevelReached,
+	att_AttributeNotRegistered
 };
 
 native att_IsEnabled();
 
-native att_setClientStrength(iClient, iStrength);
-native att_setClientStamina(iClient, iStamina);
-native att_setClientDexterity(iClient, iDexterity);
-native att_setClientAvailablePoints(iClient, iAvailablePoints);
-native att_addClientAvailablePoints(iClient, iAmount);
+functag att_AttributeCallback public(iClient, iValue, iAmount);
 
-native att_getClientStrength(iClient);
-native att_getClientStamina(iClient);
-native att_getClientDexterity(iClient);
-native att_getClientAvailablePoints(iClient);
-native attChooseResult:att_chooseStrength(iClient);
-native attChooseResult:att_chooseStamina(iClient);
-native attChooseResult:att_chooseDexterity(iClient);
+/**
+ * Register an  Attribute
+ * 
+ * @param AttributeType		Type of Attribute: good, bad or random.
+ * @param func			Callback to use for  Attribute.
+ * @return			 Attribute id to use when unregistering.
+ */
+native att_RegisterAttribute(const String:name[], const String:desc[], att_AttributeCallback:callback);
+
+/**
+ * Unregister an  Attribute (will be done automatically on plugin unload)
+ *
+ * @param iAttributeId		The  Attribute id to remove.
+ * @return			Nothing.
+ */
+native att_UnregisterAttribute(iAttributeId);
 
 
-forward att_OnClientStrengthChange(iClient, iValue, iAmount);
-forward att_OnClientStaminaChange(iClient, iValue, iAmount);
-forward att_OnClientDexterityChange(iClient, iValue, iAmount);
+/**
+ * Get the Attribute count
+ * 
+ * @return			Attribute count
+ */
+native att_GetAttributeCount();
+
+/**
+ * Get the id of an Attribute (index of the Attributearray is different than the Attributeid!)
+ * 
+ * @param iIndex		The  Attribute id to remove.
+ * @return			Attribute id
+ */
+native att_GetAttributeID(iIndex);
+
+/**
+ * Get the name of an Attribute
+ * 
+ * @param iAttributeId		The  Attribute id to remove.
+ * @return			Attribute name
+ */
+native att_GetAttributeName(iAttributeId, String:AttributeName[]);
+
+/**
+ * Get the description of an Attribute
+ * 
+ * @param iAttributeId		The  Attribute id to remove.
+ * @return			Attribute description
+ */
+native att_GetAttributeDescription(iAttributeId, String:AttributeDesc[]);
+
+
+native att_SetClientAvailablePoints(iClient, iAvailablePoints);
+native att_AddClientAvailablePoints(iClient, iAmount);
+native att_GetClientAvailablePoints(iClient);
+
+native att_SetClientAttributeValue(iClient, iAttributeId, iLevel);
+native att_GetClientAttributeValue(iClient, iAttributeId);
+native att_AddClientAttributeValue(iClient, iAttributeId, iAmount);
+
+forward att_OnClientAttributeChange(iClient, iAttributeId, iValue, iAmount);

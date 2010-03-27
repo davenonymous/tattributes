@@ -7,14 +7,14 @@
 
 #define PLUGIN_VERSION 		"0.1.0"
 #define MAXSKILLLEVEL 		10
+#define ATTRIBUTESIZE		10
 
-new Handle:g_hForwardStrengthUp;
-new Handle:g_hForwardStaminaUp;
-new Handle:g_hForwardDexterityUp;
+new Handle:g_hForwardAttributeChange;
 
-new g_iPlayerStrength[MAXPLAYERS+1];
-new g_iPlayerDexterity[MAXPLAYERS+1];
-new g_iPlayerStamina[MAXPLAYERS+1];
+new g_iAttributeId = 0;
+new g_iAttributeIdxMax = -1;
+new Handle:g_hAttributes = INVALID_HANDLE;
+
 new g_iPlayerAvailablePoints[MAXPLAYERS+1];
 
 new Handle:g_hCvarEnable;
@@ -35,8 +35,7 @@ public Plugin:myinfo =
 //////////////////////////
 //P L U G I N  S T A R T//
 //////////////////////////
-public OnPluginStart()
-{
+public OnPluginStart() {
 	// V E R S I O N    C V A R //
 	CreateConVar("sm_att_version", PLUGIN_VERSION, "Version of the plugin", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY);
 
@@ -45,13 +44,12 @@ public OnPluginStart()
 
 	HookConVarChange(g_hCvarEnable, Cvar_Changed);
 
-	g_hForwardStrengthUp = CreateGlobalForward("att_OnClientStrengthChange", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
-	g_hForwardStaminaUp = CreateGlobalForward("att_OnClientStaminaChange", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
-	g_hForwardDexterityUp = CreateGlobalForward("att_OnClientDexterityChange", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
+	g_hForwardAttributeChange = CreateGlobalForward("att_OnClientAttributeChange", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
+
+	g_hAttributes = CreateArray(ATTRIBUTESIZE);
 }
 
-public OnConfigsExecuted()
-{
+public OnConfigsExecuted() {
 	g_bEnabled = GetConVarBool(g_hCvarEnable);
 }
 
@@ -63,13 +61,9 @@ public Cvar_Changed(Handle:convar, const String:oldValue[], const String:newValu
 //////////////////////////////////
 //C L I E N T  C O N N E C T E D//
 //////////////////////////////////
-public OnClientConnected(iClient)
-{
+public OnClientConnected(iClient) {
 	if(g_bEnabled)
 	{
-		g_iPlayerStrength[iClient] = 0;
-		g_iPlayerDexterity[iClient] = 0;
-		g_iPlayerStamina[iClient] = 0;
 		g_iPlayerAvailablePoints[iClient] = 0;
 	}
 }
@@ -88,27 +82,6 @@ public OnClientDisconnect(client)
 //////////
 //Stocks//
 //////////
-stock setPlayerStrength(iClient, iStrength) {
-	if(iStrength > MAXSKILLLEVEL)
-		iStrength = MAXSKILLLEVEL;
-
-	g_iPlayerStrength[iClient] = iStrength;
-}
-
-stock setPlayerDexterity(iClient, iDexterity) {
-	if(iDexterity > MAXSKILLLEVEL)
-		iDexterity = MAXSKILLLEVEL;
-
-	g_iPlayerDexterity[iClient] = iDexterity;
-}
-
-stock setPlayerStamina(iClient, iStamina) {
-	if(iStamina > MAXSKILLLEVEL)
-		iStamina = MAXSKILLLEVEL;
-
-	g_iPlayerStamina[iClient] = iStamina;
-}
-
 stock setPlayerAvailablePoints(iClient, iPoints) {
 	if(iPoints > MAXSKILLLEVEL*3)
 		iPoints = MAXSKILLLEVEL*3;
@@ -116,46 +89,68 @@ stock setPlayerAvailablePoints(iClient, iPoints) {
 	g_iPlayerAvailablePoints[iClient] = iPoints;
 }
 
-stock attChooseResult:ChooseStrength(iClient) {
+stock attChooseResult:ChooseAttribute(iClient, iAttributeId, iAmount) {
 	if(g_iPlayerAvailablePoints[iClient] <= 0)
 		return att_NoAvailablePoints;
 
-	if(g_iPlayerStrength[iClient] >= MAXSKILLLEVEL)
-		return att_MaxSkillLevelReached;
+	if (g_iAttributeIdxMax > -1)
+	{
+		for (new i = 0; i < g_iAttributeIdxMax+1; i++)
+		{
+			new Handle:attribute = GetArrayCell(g_hAttributes, i);
 
-	g_iPlayerAvailablePoints[iClient]--;
-	g_iPlayerStrength[iClient]++;
-	Forward_StrengthChange(iClient, g_iPlayerStrength[iClient], 1);
+			if (GetArrayCell(attribute,1) == iAttributeId)
+			{
+				new playerLevels[MAXPLAYERS+1];
+				GetArrayArray(attribute,5,playerLevels,MAXPLAYERS+1);
 
-	return att_OK;
+				if(playerLevels[iClient] >= MAXSKILLLEVEL)
+					return att_MaxSkillLevelReached;
+
+				g_iPlayerAvailablePoints[iClient]--;
+				playerLevels[iClient] = playerLevels[iClient] + iAmount;
+				SetArrayArray(attribute,5,playerLevels,MAXPLAYERS+1);
+
+				Call_StartForward(GetArrayCell(attribute, 4));
+				Call_PushCell(iClient);
+				Call_PushCell(playerLevels[iClient]);
+				Call_PushCell(iAmount);
+				Call_Finish();
+
+				Forward_AttributeChange(iClient, iAttributeId, playerLevels[iClient], iAmount);
+				return att_OK;
+			}
+		}
+	}
+
+	return att_AttributeNotRegistered;
 }
 
-stock attChooseResult:ChooseStamina(iClient) {
-	if(g_iPlayerAvailablePoints[iClient] <= 0)
-		return att_NoAvailablePoints;
+stock SetClientAttributeValue(iClient, iAttributeId, iValue) {
+	if (g_iAttributeIdxMax > -1)
+	{
+		for (new i = 0; i < g_iAttributeIdxMax+1; i++)
+		{
+			new Handle:attribute = GetArrayCell(g_hAttributes, i);
 
-	if(g_iPlayerStamina[iClient] >= MAXSKILLLEVEL)
-		return att_MaxSkillLevelReached;
+			if (GetArrayCell(attribute,1) == iAttributeId)
+			{
+				new playerLevels[MAXPLAYERS+1];
+				GetArrayArray(attribute,5,playerLevels,MAXPLAYERS+1);
 
-	g_iPlayerAvailablePoints[iClient]--;
-	g_iPlayerStamina[iClient]++;
-	Forward_StaminaChange(iClient, g_iPlayerStamina[iClient], 1);
+				playerLevels[iClient] = iValue;
+				SetArrayArray(attribute,5,playerLevels,MAXPLAYERS+1);
 
-	return att_OK;
-}
+				Call_StartForward(GetArrayCell(attribute, 4));
+				Call_PushCell(iClient);
+				Call_PushCell(playerLevels[iClient]);
+				Call_PushCell(-1);
+				Call_Finish();
 
-stock attChooseResult:ChooseDexterity(iClient) {
-	if(g_iPlayerAvailablePoints[iClient] <= 0)
-		return att_NoAvailablePoints;
-
-	if(g_iPlayerDexterity[iClient] >= MAXSKILLLEVEL)
-		return att_MaxSkillLevelReached;
-
-	g_iPlayerAvailablePoints[iClient]--;
-	g_iPlayerDexterity[iClient]++;
-	Forward_DexterityChange(iClient, g_iPlayerDexterity[iClient], 1);
-
-	return att_OK;
+				Forward_AttributeChange(iClient, iAttributeId, playerLevels[iClient], -1);
+			}
+		}
+	}
 }
 
 /////////////////
@@ -170,19 +165,21 @@ stock attChooseResult:ChooseDexterity(iClient) {
 	RegPluginLibrary("attributes");
 
 	CreateNative("att_IsEnabled", Native_GetEnabled);
+	CreateNative("att_SetClientAvailablePoints", Native_SetClientAvailablePoints);
+	CreateNative("att_AddClientAvailablePoints", Native_AddClientAvailablePoints);
+	CreateNative("att_GetClientAvailablePoints", Native_GetClientAvailablePoints);
 
-	CreateNative("att_setClientStrength", Native_SetClientStrength);
-	CreateNative("att_setClientStamina", Native_SetClientStamina);
-	CreateNative("att_setClientDexterity", Native_SetClientDexterity);
-	CreateNative("att_setClientAvailablePoints", Native_SetClientAvailablePoints);
-	CreateNative("att_addClientAvailablePoints", Native_AddClientAvailablePoints);
-	CreateNative("att_getClientStrength", Native_GetClientStrength);
-	CreateNative("att_getClientStamina", Native_GetClientStamina);
-	CreateNative("att_getClientDexterity", Native_GetClientDexterity);
-	CreateNative("att_getClientAvailablePoints", Native_GetClientAvailablePoints);
-	CreateNative("att_chooseStrength", Native_ChooseStrength);
-	CreateNative("att_chooseStamina", Native_ChooseStamina);
-	CreateNative("att_chooseDexterity", Native_ChooseDexterity);
+	CreateNative("att_RegisterAttribute", Native_RegisterAttribute);
+	CreateNative("att_UnregisterAttribute", Native_UnregisterAttribute);
+	CreateNative("att_GetAttributeName", Native_GetAttributeName);
+	CreateNative("att_GetAttributeDescription", Native_GetAttributeDescription);
+	CreateNative("att_GetAttributeCount", Native_GetAttributeCount);
+	CreateNative("att_GetAttributeID", Native_GetAttributeID);
+
+	CreateNative("att_SetClientAttributeValue", Native_SetClientAttributeValue);
+	CreateNative("att_GetClientAttributeValue", Native_GetClientAttributeValue);
+	CreateNative("att_AddClientAttributeValue", Native_AddClientAttributeValue);
+
 
 	#if SOURCEMOD_V_MAJOR >= 1 && SOURCEMOD_V_MINOR >= 3
 		return APLRes_Success;
@@ -191,61 +188,184 @@ stock attChooseResult:ChooseDexterity(iClient) {
 	#endif
 }
 
+public Native_RegisterAttribute(Handle:hPlugin, iNumParams)
+{
+	// att_RegisterAttribute(type, const String:name[], const String:desc[], att_AttributeCallback:callback);
+	new Handle:attribute = CreateArray(15);
+
+	//PushArrayCell(attribute, GetNativeCell(1));			// 0
+	PushArrayCell(attribute, true);			// 0
+	new eId = g_iAttributeId;
+	g_iAttributeId++;
+	PushArrayCell(attribute, eId);				// 1
+
+	new String:tmpName[128];
+	GetNativeString(1, tmpName, sizeof(tmpName)+1);
+	PushArrayString(attribute, tmpName);					// 2
+
+	LogMessage("Registered Attribute: %s (%i)", tmpName, eId);
+	new String:tmpDesc[128];
+	GetNativeString(2, tmpDesc, sizeof(tmpDesc)+1);
+	PushArrayString(attribute, tmpDesc);					// 3
+
+	new Handle:fwd = CreateForward(ET_Single, Param_Cell, Param_Cell, Param_Cell);
+
+	if (!AddToForward(fwd, hPlugin, GetNativeCell(3)))
+	{
+		decl String:szCallerName[PLATFORM_MAX_PATH];
+		GetPluginFilename(hPlugin, szCallerName, sizeof(szCallerName));
+		ThrowError("Failed to add forward from %s", szCallerName);
+	}
+
+	PushArrayCell(attribute, fwd);							// 4
+
+	new iClientPoints[MAXPLAYERS+1] = {0,...};
+	PushArrayArray(attribute, iClientPoints);				// 5
+
+	PushArrayCell(g_hAttributes, attribute);
+	g_iAttributeIdxMax++;
+
+	return eId;
+}
+
+public Native_UnregisterAttribute(Handle:hPlugin, iNumParams)
+{
+	// *FIXME* Seems to be broken
+	new iAttributeId = GetNativeCell(1);
+
+	if (g_iAttributeIdxMax > -1)
+	{
+		for (new i = 0; i < g_iAttributeIdxMax+1; i++)
+		{
+			new Handle:attribute = GetArrayCell(g_hAttributes, i);
+
+			if (GetArrayCell(attribute,1) == iAttributeId)
+			{
+				CloseHandle(GetArrayCell(attribute,4));
+				RemoveFromArray(g_hAttributes, i);
+				g_iAttributeIdxMax--;
+				g_iAttributeId--;
+				i--;
+			}
+		}
+	}
+}
+
+
+public Native_GetAttributeCount(Handle:hPlugin, iNumParams)
+{
+	return GetArraySize(g_hAttributes);
+}
+
+public Native_GetAttributeID(Handle:hPlugin, iNumParams)
+{
+	new arrayID = GetNativeCell(1);
+
+	// *FIXME* Add some checks here
+	new Handle:attribute;
+
+	attribute = GetArrayCell(g_hAttributes, arrayID);
+	new eid = GetArrayCell(attribute, 1);
+
+	return eid;
+}
+
+//native psy_GetAttributeName(iAttributeId, attributeType);
+public Native_GetAttributeName(Handle:hPlugin, iNumParams)
+{
+	new iAttributeId = GetNativeCell(1);
+
+	//LogMessage("looking for attribute: %i", iAttributeId);
+
+	if (g_iAttributeIdxMax > -1)
+	{
+		for (new i = 0; i < g_iAttributeIdxMax+1; i++)
+		{
+			new Handle:attribute = GetArrayCell(g_hAttributes, i);
+
+			if (GetArrayCell(attribute,1) == iAttributeId)
+			{
+				new String:attributeTitle[128];
+				GetArrayString(attribute, 2, attributeTitle, 128);
+				//LogMessage("trying to pass %s", attributeTitle);
+				SetNativeString(2, attributeTitle, 64, false);
+			}
+		}
+	}
+}
+
+//native psy_GetAttributeDescription(iAttributeId, attributeType);
+public Native_GetAttributeDescription(Handle:hPlugin, iNumParams)
+{
+	new iAttributeId = GetNativeCell(1);
+
+	if (g_iAttributeIdxMax > -1)
+	{
+		for (new i = 0; i < g_iAttributeIdxMax+1; i++)
+		{
+			new Handle:attribute = GetArrayCell(g_hAttributes, i);
+
+			if (GetArrayCell(attribute,1) == iAttributeId)
+			{
+				new String:attributeDesc[64];
+				GetArrayString(attribute, 3, attributeDesc, 64);
+
+				SetNativeString(2, attributeDesc, 64, false);
+			}
+		}
+	}
+}
+
+
 //att_IsEnabled();
 public Native_GetEnabled(Handle:hPlugin, iNumParams)
 {
 	return g_bEnabled;
 }
 
-//lm_chooseStrength(iClient);
-public Native_ChooseStrength(Handle:hPlugin, iNumParams)
+//att_AddClientAttributeValue(iClient);
+public Native_AddClientAttributeValue(Handle:hPlugin, iNumParams)
 {
 	new iClient = GetNativeCell(1);
+	new iAttributeId = GetNativeCell(2);
+	new iAmount = GetNativeCell(3);
 
-	return ChooseStrength(iClient);
+	return ChooseAttribute(iClient, iAttributeId, iAmount);
 }
 
-//lm_chooseDexterity(iClient);
-public Native_ChooseDexterity(Handle:hPlugin, iNumParams)
+//att_SetClientAttributeValue(iClient, iAttributeId, iLevel);
+public Native_SetClientAttributeValue(Handle:hPlugin, iNumParams)
 {
 	new iClient = GetNativeCell(1);
+	new iAttributeId = GetNativeCell(2);
+	new iValue = GetNativeCell(3);
 
-	return ChooseDexterity(iClient);
+	SetClientAttributeValue(iClient, iAttributeId, iValue);
 }
 
-//lm_chooseStamina(iClient);
-public Native_ChooseStamina(Handle:hPlugin, iNumParams)
+//att_GetClientAttributeValue(iClient, iAttributeId);
+public Native_GetClientAttributeValue(Handle:hPlugin, iNumParams)
 {
 	new iClient = GetNativeCell(1);
+	new iAttributeId = GetNativeCell(2);
 
-	return ChooseStamina(iClient);
-}
+	if (g_iAttributeIdxMax > -1)
+	{
+		for (new i = 0; i < g_iAttributeIdxMax+1; i++)
+		{
+			new Handle:attribute = GetArrayCell(g_hAttributes, i);
 
-//lm_setClientStrength(iClient, iStrength);
-public Native_SetClientStrength(Handle:hPlugin, iNumParams)
-{
-	new iClient = GetNativeCell(1);
-	new iStrength = GetNativeCell(2);
+			if (GetArrayCell(attribute,1) == iAttributeId)
+			{
+				new playerLevels[MAXPLAYERS+1];
+				GetArrayArray(attribute,5,playerLevels,MAXPLAYERS+1);
 
-	setPlayerStrength(iClient, iStrength);
-}
+				return playerLevels[iClient];
+			}
+		}
+	}
 
-//lm_setClientStamina(iClient, iStamina);
-public Native_SetClientStamina(Handle:hPlugin, iNumParams)
-{
-	new iClient = GetNativeCell(1);
-	new iStamina = GetNativeCell(2);
-
-	setPlayerStamina(iClient, iStamina);
-}
-
-//lm_setClientDexterity(iClient, iDexterity);
-public Native_SetClientDexterity(Handle:hPlugin, iNumParams)
-{
-	new iClient = GetNativeCell(1);
-	new iDexterity = GetNativeCell(2);
-
-	setPlayerDexterity(iClient, iDexterity);
+	return 0;
 }
 
 //lm_setPlayerAvailablePoints(iClient, iPoints);
@@ -266,30 +386,6 @@ public Native_AddClientAvailablePoints(Handle:hPlugin, iNumParams)
 	setPlayerAvailablePoints(iClient, g_iPlayerAvailablePoints[iClient] + iPoints);
 }
 
-//lm_getClientStrength(iClient);
-public Native_GetClientStrength(Handle:hPlugin, iNumParams)
-{
-	new iClient = GetNativeCell(1);
-
-	return g_iPlayerStrength[iClient];
-}
-
-//lm_getClientStamina(iClient);
-public Native_GetClientStamina(Handle:hPlugin, iNumParams)
-{
-	new iClient = GetNativeCell(1);
-
-	return g_iPlayerStamina[iClient];
-}
-
-//lm_getClientDexterity(iClient);
-public Native_GetClientDexterity(Handle:hPlugin, iNumParams)
-{
-	new iClient = GetNativeCell(1);
-
-	return g_iPlayerDexterity[iClient];
-}
-
 //lm_getClientDexterity(iClient);
 public Native_GetClientAvailablePoints(Handle:hPlugin, iNumParams)
 {
@@ -298,31 +394,12 @@ public Native_GetClientAvailablePoints(Handle:hPlugin, iNumParams)
 	return g_iPlayerAvailablePoints[iClient];
 }
 
-//public att_OnClientStrengthChange(iClient, iValue, iAmount) {};
-public Forward_StrengthChange(iClient, iValue, iAmount)
+//public att_OnClientAttributeChange(iClient, iAttributeId, iValue, iAmount); {};
+public Forward_AttributeChange(iClient, iAttributeId, iValue, iAmount)
 {
-	Call_StartForward(g_hForwardStrengthUp);
+	Call_StartForward(g_hForwardAttributeChange);
 	Call_PushCell(iClient);
-	Call_PushCell(iValue);
-	Call_PushCell(iAmount);
-	Call_Finish();
-}
-
-//public att_OnClientStaminaChange(iClient, iValue, iAmount) {};
-public Forward_StaminaChange(iClient, iValue, iAmount)
-{
-	Call_StartForward(g_hForwardStaminaUp);
-	Call_PushCell(iClient);
-	Call_PushCell(iValue);
-	Call_PushCell(iAmount);
-	Call_Finish();
-}
-
-//public att_OnClientDexterityChange(iClient, iValue, iAmount) {};
-public Forward_DexterityChange(iClient, iValue, iAmount)
-{
-	Call_StartForward(g_hForwardDexterityUp);
-	Call_PushCell(iClient);
+	Call_PushCell(iAttributeId);
 	Call_PushCell(iValue);
 	Call_PushCell(iAmount);
 	Call_Finish();
