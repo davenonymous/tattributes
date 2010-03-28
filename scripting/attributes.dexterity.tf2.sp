@@ -111,7 +111,7 @@ public att_OnDexterityChange(iClient, iValue, iAmount) {
 		applyClassSpeed(iClient);
 		if(iAmount != -1)
 		{
-			CPrintToChat(iClient, "You are now running {green}%0.f{default} faster.", g_Dexterity[iClient] * g_fSpeedMultiplier * 100);
+			CPrintToChat(iClient, "You are now running {green}%0.f%%{default} faster.", g_Dexterity[iClient] * g_fSpeedMultiplier * 100);
 		}
 	}
 }

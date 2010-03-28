@@ -62,7 +62,7 @@ public att_OnCriticalChange(iClient, iValue, iAmount) {
 
 	if(iAmount != -1 && IsClientInGame(iClient))
 	{
-		CPrintToChat(iClient, "You now have a {green}%0.f\%{default} chance of dealing critical damage.", g_Critical[iClient] * g_fCritMultiplier * 100);
+		CPrintToChat(iClient, "You now have a {green}%0.f%%{default} chance of dealing critical damage.", g_Critical[iClient] * g_fCritMultiplier * 100);
 	}
 }
 

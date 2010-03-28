@@ -67,7 +67,7 @@ public att_OnStrengthChange(iClient, iValue, iAmount) {
 
 	if(iAmount != -1 && IsClientInGame(iClient))
 	{
-		CPrintToChat(iClient, "You are now dealing {green}%0.f\%{default} more damage.", g_Strength[iClient] * g_fDmgMultiplier * 100);
+		CPrintToChat(iClient, "You are now dealing {green}%0.f%%{default} more damage.", g_Strength[iClient] * g_fDmgMultiplier * 100);
 	}
 }
 
