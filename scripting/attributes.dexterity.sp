@@ -39,7 +39,7 @@ public OnPluginStart()
 		SetFailState("This plugin is not for %s", game);
 	}
 
-	g_hCvarSpeedMultiplier = CreateConVar("sm_att_dexterity_speedmultiplier", "0.02", "Speed grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
+	g_hCvarSpeedMultiplier = CreateConVar("sm_att_dexterity_speedmultiplier", "0.01", "Speed grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarSpeedMultiplier, Cvar_Changed);
 
 	g_iDexterityID = att_RegisterAttribute("Dexterity", "Increases running speed", att_OnDexterityChange);
@@ -82,7 +82,7 @@ public att_OnDexterityChange(iClient, iValue, iAmount) {
 		applyClassSpeed(iClient);
 		if(iAmount != -1)
 		{
-			CPrintToChat(iClient, "You are now running {green}%i{default} faster.", g_Dexterity[iClient] * g_fSpeedMultiplier * 100);
+			CPrintToChat(iClient, "You are now running {green}%0.f{default} faster.", g_Dexterity[iClient] * g_fSpeedMultiplier * 100);
 		}
 	}
 }

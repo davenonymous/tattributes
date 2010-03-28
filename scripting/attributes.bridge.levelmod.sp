@@ -24,7 +24,7 @@ public Plugin:myinfo =
 
 public OnPluginStart()
 {
-	g_hCvarReapplyPoints = CreateConVar("sm_att_lm_reapplypoints", "1", "Reapply points based on levelmod level. ONLY USE if you are not saving attribute points via a seperate plugin.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_hCvarReapplyPoints = CreateConVar("sm_att_lm_reapplypoints", "0", "Reapply points based on levelmod level. ONLY USE if you are not saving attribute points via a seperate plugin.", FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	HookConVarChange(g_hCvarReapplyPoints, Cvar_Changed);
 
 	HookEvent("player_spawn", Event_Player_Spawn);

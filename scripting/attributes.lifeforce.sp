@@ -38,7 +38,7 @@ public OnPluginStart()
 		SetFailState("This plugin is not for %s", game);
 	}
 
-	g_hCvarHealthPlus = CreateConVar("sm_att_lifeforce_healthplus", "3", "Health grows by this value every attribute point", FCVAR_PLUGIN, true, 0.0);
+	g_hCvarHealthPlus = CreateConVar("sm_att_lifeforce_healthplus", "2", "Health grows by this value every attribute point", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarHealthPlus, Cvar_Changed);
 
 	g_iLifeforceID = att_RegisterAttribute("Lifeforce", "Increases health", att_OnLifeforceChange);

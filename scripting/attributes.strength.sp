@@ -37,7 +37,7 @@ public OnPluginStart()
 		SetFailState("This plugin is not for %s. Use attributes.strength.l4d2 instead.", game);
 	}
 
-	g_hCvarDmgMultiplier = CreateConVar("sm_att_strength_dmgmultiplier", "0.02", "Damage done grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
+	g_hCvarDmgMultiplier = CreateConVar("sm_att_strength_dmgmultiplier", "0.01", "Damage done grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarDmgMultiplier, Cvar_Changed);
 
 	g_iStrengthID = att_RegisterAttribute("Strength", "Increases damage you deal", att_OnStrengthChange);
@@ -67,7 +67,7 @@ public att_OnStrengthChange(iClient, iValue, iAmount) {
 
 	if(iAmount != -1 && IsClientInGame(iClient))
 	{
-		CPrintToChat(iClient, "You are now dealing {green}%i\%{default} more damage.", g_Strength[iClient] * g_fDmgMultiplier * 100);
+		CPrintToChat(iClient, "You are now dealing {green}%0.f\%{default} more damage.", g_Strength[iClient] * g_fDmgMultiplier * 100);
 	}
 }
 

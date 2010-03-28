@@ -4,7 +4,7 @@
 #define _attributes_included_
 
 #define TATTAPIVERSION 1
-#define MAXSKILLLEVEL 		10
+#define MAXSKILLLEVEL 		20
 #define ATTRIBUTESIZE		10
 
 enum attChooseResult {
