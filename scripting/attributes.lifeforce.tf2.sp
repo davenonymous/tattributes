@@ -42,8 +42,6 @@ public OnPluginStart()
 	g_hCvarHealthPlus = CreateConVar("sm_att_lifeforce_healthplus", "2", "Health grows by this value every attribute point", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarHealthPlus, Cvar_Changed);
 
-	g_iLifeforceID = att_RegisterAttribute("Lifeforce", "Increases health", att_OnLifeforceChange);
-
 	HookEvent("player_spawn", Event_Player_Spawn);
 	HookEvent("post_inventory_application", EventInventoryApplication,  EventHookMode_Post);
 }
@@ -57,6 +55,11 @@ public Cvar_Changed(Handle:convar, const String:oldValue[], const String:newValu
 	OnConfigsExecuted();
 }
 
+public OnAllPluginsLoaded() {
+	if(LibraryExists("attributes")) {
+		g_iLifeforceID = att_RegisterAttribute("Lifeforce", "Increases health", att_OnLifeforceChange);
+	}
+}
 //////////////////////////
 //E V E N T   H O O K S //
 //////////////////////////
@@ -85,7 +88,8 @@ public Event_Player_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
 
 public OnPluginEnd()
 {
-	att_UnregisterAttribute(g_iLifeforceID);
+	//att_UnregisterAttribute(g_iLifeforceID);
+	LogMessage("Did NOT unload LifeForce Attribute (%i)", g_iLifeforceID);
 }
 
 public att_OnLifeforceChange(iClient, iValue, iAmount) {

@@ -43,8 +43,6 @@ public OnPluginStart()
 	g_hCvarSpeedMultiplier = CreateConVar("sm_att_dexterity_speedmultiplier", "0.01", "Speed grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarSpeedMultiplier, Cvar_Changed);
 
-	g_iDexterityID = att_RegisterAttribute("Dexterity", "Increases running speed", att_OnDexterityChange);
-
 	HookEvent("player_spawn", Event_Player_Spawn);
 	HookEvent("post_inventory_application", EventInventoryApplication,  EventHookMode_Post);
 }
@@ -58,6 +56,11 @@ public Cvar_Changed(Handle:convar, const String:oldValue[], const String:newValu
 	OnConfigsExecuted();
 }
 
+public OnAllPluginsLoaded() {
+	if(LibraryExists("attributes")) {
+		g_iDexterityID = att_RegisterAttribute("Dexterity", "Increases running speed", att_OnDexterityChange);
+	}
+}
 //////////////////////////
 //E V E N T   H O O K S //
 //////////////////////////
@@ -102,7 +105,8 @@ public Event_Player_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
 
 public OnPluginEnd()
 {
-	att_UnregisterAttribute(g_iDexterityID);
+	//att_UnregisterAttribute(g_iDexterityID);
+	LogMessage("Did NOT unload Dexterity Attribute (%i)", g_iDexterityID);
 }
 
 public att_OnDexterityChange(iClient, iValue, iAmount) {

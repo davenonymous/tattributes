@@ -40,7 +40,13 @@ public OnPluginStart()
 	g_hCvarDmgMultiplier = CreateConVar("sm_att_strength_dmgmultiplier", "0.01", "Damage done grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarDmgMultiplier, Cvar_Changed);
 
-	g_iStrengthID = att_RegisterAttribute("Strength", "Increases damage you deal", att_OnStrengthChange);
+
+}
+
+public OnAllPluginsLoaded() {
+	if(LibraryExists("attributes")) {
+		g_iStrengthID = att_RegisterAttribute("Strength", "Increases damage you deal", att_OnStrengthChange);
+	}
 }
 
 public OnConfigsExecuted()
@@ -54,7 +60,8 @@ public Cvar_Changed(Handle:convar, const String:oldValue[], const String:newValu
 
 public OnPluginEnd()
 {
-	att_UnregisterAttribute(g_iStrengthID);
+	//att_UnregisterAttribute(g_iStrengthID);
+	LogMessage("Did NOT unload Strength Attribute (%i)", g_iStrengthID);
 }
 
 public OnClientPutInServer(client)
@@ -73,13 +80,14 @@ public att_OnStrengthChange(iClient, iValue, iAmount) {
 
 public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
-	new skillpoints = g_Strength[attacker];
-	if(skillpoints > 0)
-	{
-		damage *= (1.0 + skillpoints * g_fDmgMultiplier);
+	if(attacker > 0 && attacker <= MaxClients) {
+		new skillpoints = g_Strength[attacker];
+		if(skillpoints > 0)
+		{
+			damage *= (1.0 + skillpoints * g_fDmgMultiplier);
 
-		return Plugin_Changed;
+			return Plugin_Changed;
+		}
 	}
-
 	return Plugin_Continue;
 }

@@ -39,8 +39,12 @@ public OnPluginStart()
 
 	g_hCvarCritMultiplier = CreateConVar("sm_att_critical_critmultiplier", "0.01", "Damage done grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarCritMultiplier, Cvar_Changed);
+}
 
-	g_iCriticalID = att_RegisterAttribute("CritChance", "Increases chance to deal critical damage", att_OnCriticalChange);
+public OnAllPluginsLoaded() {
+	if(LibraryExists("attributes")) {
+		g_iCriticalID = att_RegisterAttribute("CritChance", "Increases chance to deal critical damage", att_OnCriticalChange);
+	}
 }
 
 public OnConfigsExecuted()
@@ -54,7 +58,8 @@ public Cvar_Changed(Handle:convar, const String:oldValue[], const String:newValu
 
 public OnPluginEnd()
 {
-	att_UnregisterAttribute(g_iCriticalID);
+	//att_UnregisterAttribute(g_iCriticalID);
+	LogMessage("Did NOT unload Critical Attribute (%i)", g_iCriticalID);
 }
 
 public att_OnCriticalChange(iClient, iValue, iAmount) {

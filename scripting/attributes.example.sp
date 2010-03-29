@@ -19,14 +19,19 @@ public Plugin:myinfo =
 
 public OnPluginStart()
 {
-	g_iExampleID = att_RegisterAttribute("Example", "Prints how many points you spend on this attribute.", att_OnExampleChange);
-
 	HookEvent("player_spawn", Event_Player_Spawn);
+}
+
+public OnAllPluginsLoaded() {
+	if(LibraryExists("attributes")) {
+		g_iExampleID = att_RegisterAttribute("Example", "Prints how many points you spend on this attribute.", att_OnExampleChange);
+	}
 }
 
 public OnPluginEnd()
 {
-	att_UnregisterAttribute(g_iExampleID);
+	//att_UnregisterAttribute(g_iExampleID);
+	LogMessage("Did NOT unload Example Attribute (%i)", g_iExampleID);
 }
 
 public att_OnExampleChange(iClient, iValue, iAmount) {
