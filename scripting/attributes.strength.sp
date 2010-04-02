@@ -4,7 +4,7 @@
 #include <colors>
 
 #pragma semicolon 1
-#define PLUGIN_VERSION "0.1.0"
+#define PLUGIN_VERSION "0.1.1"
 
 new Handle:g_hCvarDmgMultiplier;
 new Float:g_fDmgMultiplier;
@@ -66,7 +66,8 @@ public OnPluginEnd()
 
 public OnClientPutInServer(client)
 {
-    SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+	if(att_IsEnabled())
+    	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
 }
 
 public att_OnStrengthChange(iClient, iValue, iAmount) {
@@ -80,7 +81,7 @@ public att_OnStrengthChange(iClient, iValue, iAmount) {
 
 public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damagetype)
 {
-	if(attacker > 0 && attacker <= MaxClients) {
+	if(attacker > 0 && attacker <= MaxClients && att_IsEnabled()) {
 		new skillpoints = g_Strength[attacker];
 		if(skillpoints > 0)
 		{
