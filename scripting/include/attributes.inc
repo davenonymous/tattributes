@@ -55,9 +55,10 @@ native att_GetAttributeID(iIndex);
  * Get the name of an Attribute
  * 
  * @param iAttributeId		The  Attribute id to remove.
- * @return			Attribute name
+ * @param AttributeName		The string the Attribute name will be put in
+ * @return			True if the attribute exists, false if not.
  */
-native att_GetAttributeName(iAttributeId, String:AttributeName[]);
+native bool:att_GetAttributeName(iAttributeId, String:AttributeName[]);
 
 /**
  * Get the description of an Attribute

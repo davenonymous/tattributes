@@ -287,9 +287,12 @@ public Native_GetAttributeName(Handle:hPlugin, iNumParams)
 				GetArrayString(attribute, 2, attributeTitle, 128);
 				//LogMessage("trying to pass %s", attributeTitle);
 				SetNativeString(2, attributeTitle, 64, false);
+				return true;
 			}
 		}
 	}
+
+	return false;
 }
 
 //native psy_GetAttributeDescription(iAttributeId, attributeType);
