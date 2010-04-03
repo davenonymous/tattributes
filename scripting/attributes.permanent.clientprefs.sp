@@ -58,7 +58,7 @@ stock loadValues(client) {
 		new eID = att_GetAttributeID(i);
 
 		new String:sResult[4];
-		GetClientCookie(client, db_Attribute[i], sResult, sizeof(sResult));
+		GetClientCookie(client, db_Attribute[eID], sResult, sizeof(sResult));
 
 		new iResult = StringToInt(sResult);
 
