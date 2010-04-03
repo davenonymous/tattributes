@@ -106,4 +106,10 @@ public OnClientDisconnect(client)
 			SetClientCookie(client, db_Attribute[eID], sResult);
 		}
 	}
+
+	new iAvailable = att_GetClientAvailablePoints(client);
+	new String:sPoints[5];
+	Format(sPoints,sizeof(sPoints),"%i",iAvailable);
+	SetClientCookie(client, db_points, sPoints);
+	LogMessage("Writing %N cookie: available points = %i", client, iAvailable);
 }
