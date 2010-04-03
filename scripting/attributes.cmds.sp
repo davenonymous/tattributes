@@ -43,7 +43,7 @@ public Action:Command_SetPlayerAttribute(client, args)
 
 	if (args < 2)
 	{
-		ReplyToCommand(client, "[SM] Usage: sm_att_set <OPT:#id|name> <#attributeID|'all'> <value>");
+		ReplyToCommand(client, "[SM] Usage: sm_att_set <OPT:#id|name> <#attributeID|'all'|'free'> <value>");
 		return Plugin_Handled;
 	}
 
@@ -55,7 +55,7 @@ public Action:Command_SetPlayerAttribute(client, args)
 		new String:arg1[64];
 		GetCmdArg(1, arg1, sizeof(arg1));
 
-		if(strcmp(arg1, "all", false) == 0) {
+		if(StrEqual(arg1, "all")) {
 			new count = att_GetAttributeCount();
 			for(new i = 0; i < count; i++) {
 				new aID = att_GetAttributeID(i);
@@ -66,6 +66,9 @@ public Action:Command_SetPlayerAttribute(client, args)
 					att_SetClientAttributeValue(client, aID, newLevel);
 				}
 			}
+		} else if (StrEqual(arg1, "free")) {
+			att_SetClientAvailablePoints(client, newLevel);
+			ReplyToCommand(client, "You now have %i attribute points available.", newLevel);
 		} else {
 			new aID = StringToInt(arg1);
 
@@ -105,24 +108,24 @@ public Action:Command_SetPlayerAttribute(client, args)
 			new String:arg2[64];
 			GetCmdArg(2, arg2, sizeof(arg2));
 
-			if(strcmp(arg2, "all", false) == 0) {
+			if(StrEqual(arg2, "all")) {
 				new count = att_GetAttributeCount();
 				for(new j = 0; j < count; i++) {
 					new aID = att_GetAttributeID(j);
 
 					new String:aName[64];
 					if(att_GetAttributeName(aID,aName)) {
-						ReplyToCommand(client, "Your %s has been set to %i", aName, newLevel);
-						att_SetClientAttributeValue(client, aID, newLevel);
+						att_SetClientAttributeValue(TargetList[i], aID, newLevel);
 					}
 				}
+			} else if (StrEqual(arg2, "free")) {
+				att_SetClientAvailablePoints(TargetList[i], newLevel);
 			} else {
 				new aID = StringToInt(arg2);
 
 				new String:aName[64];
 				if(att_GetAttributeName(aID,aName)) {
-					ReplyToCommand(client, "Your %s has been set to %i", aName, newLevel);
-					att_SetClientAttributeValue(client, aID, newLevel);
+					att_SetClientAttributeValue(TargetList[i], aID, newLevel);
 				}
 			}
 		}
