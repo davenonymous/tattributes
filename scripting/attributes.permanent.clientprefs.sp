@@ -6,7 +6,7 @@
 
 #define PLUGIN_VERSION "0.1.0"
 
-new Handle:db_Attribute[ATTRIBUTESIZE];
+new Handle:db_Attribute[ATTRIBUTESIZE] = {INVALID_HANDLE, ...};
 new Handle:db_points;
 
 new bool:g_bValuesLoaded[MAXPLAYERS+1] = {false,...};
@@ -59,7 +59,7 @@ public Event_Player_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
 }
 
 
-public OnClientPutInServer(client) {
+public OnConnected(client) {
 	g_bValuesLoaded[client] = false;
 }
 
@@ -70,6 +70,9 @@ stock loadValues(client) {
 	new count = att_GetAttributeCount();
 	for(new i = 0; i < count; i++) {
 		new eID = att_GetAttributeID(i);
+
+		if(db_Attribute[eID] == INVALID_HANDLE)
+			continue;
 
 		new String:sResult[4];
 		GetClientCookie(client, db_Attribute[eID], sResult, sizeof(sResult));
@@ -116,6 +119,9 @@ public OnClientDisconnect(client)
 			att_GetAttributeName(eID,eName);
 
 			LogMessage("Writing client cookie: %s = %i", eName, iResult);
+
+			if(db_Attribute[eID] == INVALID_HANDLE)
+				continue;
 
 			SetClientCookie(client, db_Attribute[eID], sResult);
 		}

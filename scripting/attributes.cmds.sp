@@ -102,30 +102,36 @@ public Action:Command_SetPlayerAttribute(client, args)
 		// Apply to all targets
 		for (new i = 0; i < TargetCount; i++)
 		{
-			if (!IsClientConnected(TargetList[i])) continue;
-			if (!IsClientInGame(TargetList[i]))    continue;
+			new target = TargetList[i];
+
+			if (!IsClientConnected(target)) continue;
+			if (!IsClientInGame(target))    continue;
+			if (target < 1 || target > MaxClients) continue;
+
+			LogMessage("Setting values of %N", target);
 
 			new String:arg2[64];
 			GetCmdArg(2, arg2, sizeof(arg2));
 
 			if(StrEqual(arg2, "all")) {
 				new count = att_GetAttributeCount();
-				for(new j = 0; j < count; i++) {
+				for(new j = 0; j < count; j++) {
 					new aID = att_GetAttributeID(j);
 
 					new String:aName[64];
 					if(att_GetAttributeName(aID,aName)) {
-						att_SetClientAttributeValue(TargetList[i], aID, newLevel);
+						LogMessage("Setting %N, %s to %i", target, aName, newLevel);
+						att_SetClientAttributeValue(target, aID, newLevel);
 					}
 				}
 			} else if (StrEqual(arg2, "free")) {
-				att_SetClientAvailablePoints(TargetList[i], newLevel);
+				att_SetClientAvailablePoints(target, newLevel);
 			} else {
 				new aID = StringToInt(arg2);
 
 				new String:aName[64];
 				if(att_GetAttributeName(aID,aName)) {
-					att_SetClientAttributeValue(TargetList[i], aID, newLevel);
+					att_SetClientAttributeValue(target, aID, newLevel);
 				}
 			}
 		}
