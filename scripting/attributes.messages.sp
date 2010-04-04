@@ -60,6 +60,7 @@ public Event_Player_Death(Handle:event, const String:name[], bool:dontBroadcast)
 	}
 }
 
+/*
 public att_OnClientAttributeChange(iClient, iAttributeId, iValue, iAmount) {
 	if(att_IsEnabled() && iClient > 0 && iClient <= MaxClients && IsClientInGame(iClient))
 	{
@@ -67,3 +68,4 @@ public att_OnClientAttributeChange(iClient, iAttributeId, iValue, iAmount) {
 			CPrintToChat(iClient, "Your attribute points have been loaded.");
 	}
 }
+*/
