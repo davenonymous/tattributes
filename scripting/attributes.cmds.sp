@@ -134,8 +134,6 @@ public Action:Command_SetPlayerAttribute(client, args)
 	return Plugin_Handled;
 }
 
-
-
 public Action:Command_GetPlayerInfos(client, args)
 {
 	if(!att_IsEnabled()) {

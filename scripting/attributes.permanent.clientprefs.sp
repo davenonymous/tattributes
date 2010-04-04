@@ -10,6 +10,7 @@ new Handle:db_Attribute[ATTRIBUTESIZE];
 new Handle:db_points;
 
 new bool:g_bValuesLoaded[MAXPLAYERS+1] = {false,...};
+new bool:g_bDBRegistered = false;
 
 ////////////////////////
 //P L U G I N  I N F O//
@@ -36,21 +37,34 @@ public OnAllPluginsLoaded() {
 	}
 
 	db_points = RegClientCookie("attributes_available", "Available attribute points to the player ", CookieAccess_Private);
+
+	g_bDBRegistered = true;
+	HookEvent("player_spawn", Event_Player_Spawn);
 }
 
 /////////////////////////
 //L O A D  F R O M  D B//
 /////////////////////////
 public OnClientCookiesCached(client) {
-	loadValues(client);
+	if(att_IsEnabled())
+		loadValues(client);
 }
+
+public Event_Player_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
+{
+	new client = GetClientOfUserId(GetEventInt(event, "userid"));
+
+	if(att_IsEnabled())
+		loadValues(client);
+}
+
 
 public OnClientPutInServer(client) {
 	g_bValuesLoaded[client] = false;
 }
 
 stock loadValues(client) {
-	if (!AreClientCookiesCached(client) || g_bValuesLoaded[client])
+	if (!AreClientCookiesCached(client) || g_bValuesLoaded[client] || !g_bDBRegistered)
 		return;
 
 	new count = att_GetAttributeCount();
