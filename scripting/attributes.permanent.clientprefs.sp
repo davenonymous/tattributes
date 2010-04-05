@@ -25,6 +25,11 @@ public Plugin:myinfo =
 }
 
 public OnAllPluginsLoaded() {
+	CreateTimer(0.1, LateRegister);
+}
+
+public Action:LateRegister(Handle:timer, any:client)
+{
 	new count = att_GetAttributeCount();
 	for(new i = 0; i < count; i++) {
 		new eID = att_GetAttributeID(i);
@@ -32,7 +37,7 @@ public OnAllPluginsLoaded() {
 		new String:eName[64];
 		att_GetAttributeName(eID,eName);
 		Format(eName, sizeof(eName), "attributes_%s", eName);
-
+		LogMessage("Registering Attribute: %s", eName);
 		db_Attribute[eID] = RegClientCookie(eName, "Attribute Mod", CookieAccess_Private);
 	}
 
@@ -59,7 +64,7 @@ public Event_Player_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
 }
 
 
-public OnConnected(client) {
+public OnClientConnected(client) {
 	g_bValuesLoaded[client] = false;
 }
 

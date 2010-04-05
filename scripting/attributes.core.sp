@@ -63,6 +63,20 @@ public OnClientConnected(iClient) {
 	if(g_bEnabled)
 	{
 		g_iPlayerAvailablePoints[iClient] = 0;
+
+		if (g_iAttributeIdxMax > -1)
+		{
+			for (new i = 0; i < g_iAttributeIdxMax+1; i++)
+			{
+				new Handle:attribute = GetArrayCell(g_hAttributes, i);
+
+				new playerLevels[MAXPLAYERS+1];
+				GetArrayArray(attribute,5,playerLevels,MAXPLAYERS+1);
+
+				playerLevels[iClient] = 0;
+				SetArrayArray(attribute,5,playerLevels,MAXPLAYERS+1);
+			}
+		}
 	}
 }
 
