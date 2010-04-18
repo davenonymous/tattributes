@@ -50,11 +50,12 @@ public Action:LateRegister(Handle:timer, any:client)
 /////////////////////////
 //L O A D  F R O M  D B//
 /////////////////////////
+/*
 public OnClientCookiesCached(client) {
 	if(att_IsEnabled())
 		loadValues(client);
 }
-
+*/
 public Event_Player_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
 {
 	new client = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -62,7 +63,6 @@ public Event_Player_Spawn(Handle:event, const String:name[], bool:dontBroadcast)
 	if(att_IsEnabled())
 		loadValues(client);
 }
-
 
 public OnClientConnected(client) {
 	g_bValuesLoaded[client] = false;
@@ -72,6 +72,7 @@ stock loadValues(client) {
 	if (!AreClientCookiesCached(client) || g_bValuesLoaded[client] || !g_bDBRegistered)
 		return;
 
+	LogMessage("DB: Loading %N", client);
 	new count = att_GetAttributeCount();
 	for(new i = 0; i < count; i++) {
 		new eID = att_GetAttributeID(i);
@@ -93,16 +94,38 @@ stock loadValues(client) {
 		}
 	}
 
+	if(count < 1) {
+		LogMessage("DB: There were no attributes registered when %N loaded his values. FAIL!", client);
+	}
+
 	new String:sPoints[20];
 	GetClientCookie(client, db_points, sPoints, sizeof(sPoints));
 	new iPoints = StringToInt(sPoints);
 
+	LogMessage("DB: %N has Points: %i", client, iPoints);
 	if(iPoints >= 0) {
 		att_SetClientAvailablePoints(client, iPoints);
-		LogMessage("DB: %N has Points: %i", client, iPoints);
 	}
 
 	g_bValuesLoaded[client] = true;
+}
+
+public att_OnClientAttributeChange(iClient, iAttributeId, iValue, iAmount) {
+	LogMessage("DB: Saving %N (OnChange!)", iClient);
+
+	new String:eName[64] = "";
+	att_GetAttributeName(iAttributeId,eName);
+
+	if(db_Attribute[iAttributeId] == INVALID_HANDLE) {
+		LogMessage("DB: Writing %N cookie: %s = %i (FAIL, not registered in db)", iClient, eName, iValue);
+		return;
+	}
+
+	LogMessage("DB: Writing %N cookie: %s = %i (OK)", iClient, eName, iValue);
+
+	new String:sResult[20];
+	Format(sResult, sizeof(sResult), "%i", iValue);
+	SetClientCookie(iClient, db_Attribute[iAttributeId], sResult);
 }
 
 /////////////////////
@@ -110,31 +133,40 @@ stock loadValues(client) {
 /////////////////////
 public OnClientDisconnect(client)
 {
+	LogMessage("DB: Saving %N", client);
+
 	new count = att_GetAttributeCount();
 	for(new i = 0; i < count; i++) {
 		new eID = att_GetAttributeID(i);
 
 		new iResult = att_GetClientAttributeValue(client, eID);
+		new written = false;
 
+		new String:eName[64] = "";
 		if(iResult > 0) {
 			new String:sResult[20];
 			Format(sResult, sizeof(sResult), "%i", iResult);
 
-			new String:eName[64];
 			att_GetAttributeName(eID,eName);
-
-			LogMessage("Writing client cookie: %s = %i", eName, iResult);
 
 			if(db_Attribute[eID] == INVALID_HANDLE)
 				continue;
 
+			written = true;
 			SetClientCookie(client, db_Attribute[eID], sResult);
 		}
+
+		LogMessage("DB: Writing %N cookie: %s = %i (%s)", client, eName, iResult, written ? "OK" : "FAIL");
+	}
+
+	if(count < 1) {
+		LogMessage("DB: There were no attributes registered when %N disconnected. FAIL!", client);
 	}
 
 	new iAvailable = att_GetClientAvailablePoints(client);
 	new String:sPoints[5];
 	Format(sPoints,sizeof(sPoints),"%i",iAvailable);
 	SetClientCookie(client, db_points, sPoints);
-	LogMessage("Writing %N cookie: available points = %i", client, iAvailable);
+
+	LogMessage("DB: Writing %N cookie: available points = %i", client, iAvailable);
 }
