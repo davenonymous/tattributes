@@ -39,7 +39,7 @@ public OnPluginStart()
 		SetFailState("This plugin is not for %s. Use attributes.endurance instead.", game);
 	}
 
-	g_hCvarDmgMultiplier = CreateConVar("sm_att_endurance_dmgmultiplier", "0.02", "Damage done grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
+	g_hCvarDmgMultiplier = CreateConVar("sm_att_endurance_dmgmultiplier", "0.02", "Damage received is reduced by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarDmgMultiplier, Cvar_Changed);
 
 	HookEvent("player_hurt", Event_PlayerHurt);
