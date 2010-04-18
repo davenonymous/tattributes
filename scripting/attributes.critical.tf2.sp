@@ -37,7 +37,7 @@ public OnPluginStart()
 		SetFailState("This plugin is not for %s. Use attributes.strength.l4d2 instead.", game);
 	}
 
-	g_hCvarCritMultiplier = CreateConVar("sm_att_critical_critmultiplier", "0.01", "Damage done grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
+	g_hCvarCritMultiplier = CreateConVar("sm_att_critical_critmultiplier", "0.01", "Chance to deal critical damage grows by this multiplier every attribute point", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarCritMultiplier, Cvar_Changed);
 }
 
