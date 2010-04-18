@@ -9,6 +9,10 @@
 new Handle:g_hCvarHealthPlus;
 new g_iHealthPlus;
 
+new Handle:g_hCvarBaseHealth;
+new g_iBaseHealth;
+
+
 new g_Lifeforce[MAXPLAYERS+1];
 new g_iLifeforceID;
 
@@ -39,7 +43,9 @@ public OnPluginStart()
 	}
 
 	g_hCvarHealthPlus = CreateConVar("sm_att_lifeforce_healthplus", "2", "Health grows by this value every attribute point", FCVAR_PLUGIN, true, 0.0);
+	g_hCvarBaseHealth = CreateConVar("sm_att_lifeforce_basehealth", "200", "Base Health for survivors", FCVAR_PLUGIN, true, 0.0);
 	HookConVarChange(g_hCvarHealthPlus, Cvar_Changed);
+	HookConVarChange(g_hCvarBaseHealth, Cvar_Changed);
 
 	HookEvent("player_spawn", Event_Player_Spawn);
 }
@@ -47,6 +53,7 @@ public OnPluginStart()
 public OnConfigsExecuted()
 {
 	g_iHealthPlus = GetConVarInt(g_hCvarHealthPlus);
+	g_iBaseHealth = GetConVarInt(g_hCvarBaseHealth);
 }
 
 public Cvar_Changed(Handle:convar, const String:oldValue[], const String:newValue[]) {
@@ -89,7 +96,12 @@ public att_OnLifeforceChange(iClient, iValue, iAmount) {
 }
 
 stock applyClassHealth(client) {
-	new iHealth = 200 + g_Lifeforce[client] * g_iHealthPlus;
+	new iHealth = g_iBaseHealth + g_Lifeforce[client] * g_iHealthPlus;
+	
+	if(IsClientInGame(client) && GetClientTeam(client) == 3){
+		iHealth = GetEntProp(client, Prop_Data, "m_iMaxHealth") + g_Lifeforce[client] * g_iHealthPlus;
+	}
+	
 	new iCurrentDiff = GetEntProp(client, Prop_Data, "m_iMaxHealth") - GetClientHealth(client);
 
 	SetEntProp(client, Prop_Data, "m_iMaxHealth", iHealth);
